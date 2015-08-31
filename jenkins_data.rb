@@ -8,11 +8,11 @@ require 'open-uri'
 #
 
 # http://www.unixtimestamp.com/index.php
-# start timestamp:  midnight July 1 2015 UTC
-start_timestamp = 1435708800000
+# start timestamp:  midnight August 1 2015 UTC
+start_timestamp = 1438387200000 
 
-# end timestamp:  midnight August 1 2015 UTC
-end_timestamp = 1438387200000 
+# end timestamp:  midnight September 1 2015 UTC
+end_timestamp = 1441065600000
 
 # name of jenkins master
 jenkins_master=''
@@ -155,11 +155,15 @@ pn = pipeline_names.sort.uniq
 pn.each do |name|
   # Take the weighted average of the build/test/release components of the pipeline
   pr = pipeline_results.find_all { |result| result[0].eql?(name) }
+  if pr.any? { |result| result[3].eql?('No successful build in the specified time period') }
+    puts "#{name},No successful pipeline runs during the specified time period"
+    next
+  end
   cs = 0
   qu = 0
   denominator = pr.collect { |r| r[2] }.inject { |qu,r| qu + r } 
   if denominator == 0
-    puts "#{name},No successful builds during the specified time period"
+    puts "#{name},No successful pipeline runs during the specified time period"
     next
   end
   numerator = pr.collect { |r| r[2] * r[3] }.inject { |cs,r| cs +r }
