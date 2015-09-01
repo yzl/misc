@@ -15,7 +15,7 @@ start_timestamp = 1438387200000
 end_timestamp = 1441065600000
 
 # name of jenkins master
-jenkins_master=''
+jenkins_master='wilson'
  
 jenkins_url="http://#{jenkins_master}.ci.chef.co/api/json"
 
@@ -85,8 +85,29 @@ class BuildData
   end
 
   def build_data
-    range_url = @job_url +  "api/json?tree=allBuilds[number,duration,result]%7B#{left},#{right}%7D"
-    json_result(range_url)['allBuilds']
+    @build_data ||= get_build_data
+  end
+
+  def get_build_data
+    # http://manhattan.ci.chef.co/job/chefdk-build/api/json?tree=allBuilds[number,actions[causes[upstreamProject]]]%7B0,69%7D
+    # gives you causes
+    range_url = @job_url +  "api/json?tree=allBuilds[number,duration,result,actions[causes[upstreamProject]]]%7B#{left},#{right}%7D"
+    all_builds = json_result(range_url)['allBuilds']
+
+    prune(all_builds)
+  end
+
+  # prune ad hoc builds
+  def prune(bd)
+    pruned = []
+    bd.each do |build|
+      causes =  build['actions'].find_all { |elt| elt.key?('causes') } 
+      upstream = causes.reject { |elt| elt['causes'].eql?([{}]) }
+      ad_hoc_builds = upstream.find_all { |u| u['causes'][0]['upstreamProject'].include?('ad_hoc') }
+      next unless ad_hoc_builds.empty?
+      pruned.push(build)
+    end
+    pruned
   end
 
   def count(thing)
