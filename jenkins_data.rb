@@ -8,11 +8,11 @@ require 'open-uri'
 #
 
 # http://www.unixtimestamp.com/index.php
-# start timestamp:  midnight August 1 2015 UTC
-start_timestamp = 1438387200000 
+# start timestamp:  midnight January 1 2016 UTC
+start_timestamp = 1451606400000
 
-# end timestamp:  midnight September 1 2015 UTC
-end_timestamp = 1441065600000
+# end timestamp:  midnight February 1 2016 UTC
+end_timestamp = 1454284800000
 
 # name of jenkins master
 jenkins_master='wilson'
